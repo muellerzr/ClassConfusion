@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt
+from fastai.vision.image import img2np
 from google.colab import widgets
 from fastai.vision import ClassificationInterpretation
 
