@@ -1,70 +1,59 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from itertools import permutations
 from fastai.vision.image import image2np
 from google.colab import widgets
 from fastai.vision import ClassificationInterpretation
 
-def ClassLosses(interp:ClassificationInterpretation, k:float, class_1:str, class_2:str, **kwargs):
+def ClassLosses(interp:ClassificationInterpretation, k:float, classes:list, **kwargs):
     if ('figsize' in kwargs):
         figsize = kwargs['figsize']
     else:
         figsize = (8,8)
-    c1, c2 = class_1, class_2
+    comb = list(permutations(classes, 2))
     val, idxs = interp.top_losses(len(interp.losses))
-    tb1 = str(class_1 + ' x ' + class_2)
-    tb2 = str(class_2 + ' x ' + class_1)
+
     cols = math.ceil(math.sqrt(k))
     rows = math.ceil(k/cols)
-    
-    classes = interp.data.classes
-    
+
+    classes_gnd = interp.data.classes
+
     vals = interp.most_confused()
+    ranges = []
+    tbnames = []
+
     
-    for x in range(len(vals)):
-      if class_1 and class_2 in vals[x]:
-        if vals[x][0] == class_1:
-          rg1 = vals[x][2]
-        if vals[x][0] == class_2:
-          rg2 = vals[x][2]
+    for x in iter(vals):
+      for y in iter(comb):
+        if x[0:2] == y:
+          ranges.append(x[2])
+          tbnames.append(str(x[0] + ' | ' + x[1])) 
   
-  
-    x1 = 0
-    x2 = 0
-
-    tb = widgets.TabBar([str(c1 + ' x ' + c2),
-              str(c2 + ' x ' + c1)])
-    with tb.output_to(tb1):
-      fig1, axes1 = plt.subplots(rows, cols, figsize=figsize)
-      [axi.set_axis_off() for axi in axes1.ravel()]
-      for i, idx in enumerate(idxs):
-        if k < x1+1 or x1 > rg1:
-          break
-        da, cl = interp.data.dl(interp.ds_type).dataset[idx]
-        row1 = (int)(x1 / cols)
-        col1 = x1 % cols
-
-        ix = int(cl)
-        if str(cl) == c1 and str(classes[interp.pred_class[idx]]) == c2:
-          da = image2np(da.data*255).astype(np.uint8)
-          axes1[row1, col1].imshow(da)
-          x1 += 1
-      
-      fig1.show()
-    with tb.output_to(tb2):
-        fig2, axes2 = plt.subplots(rows, cols, figsize=figsize)
-        [axi.set_axis_off() for axi in axes2.ravel()]
-        for i, idx in enumerate(idxs):
-          if k < x2+1 or x2 > rg2:
+    tb = widgets.TabBar(tbnames)
+        
+    for i, tab in enumerate(tbnames):
+      with tb.output_to(i):
+        x = 0
+        
+        if ranges[i] < k:
+          cols = math.ceil(math.sqrt(ranges[i]))
+          rows = math.ceil(k/cols)
+        if ranges[i] < 4:
+          cols = 2
+          rows = 2
+        fig, axes = plt.subplots(rows, cols, figsize=figsize)
+        [axi.set_axis_off() for axi in axes.ravel()]
+        for j, idx in enumerate(idxs):
+          if k < x+1 or x > ranges[i]:
             break
           da, cl = interp.data.dl(interp.ds_type).dataset[idx]
-          row2 = (int)(x2 / cols)
-          col2 = x2 % cols
+          row = (int)(x / cols)
+          col = x % cols
 
           ix = int(cl)
-          if str(cl) == c2 and str(classes[interp.pred_class[idx]]) == c1:
+          if str(cl) == tab[0] and str(classes_gnd[interp.pred_class[idx]]) == tab[1]:
             da = image2np(da.data*255).astype(np.uint8)
-            axes2[row2, col2].imshow(da)
-            x1 += 1
-        
-        fig2.show()
+            axes[row, col].imshow(da)
+            x += 1
+        plt.tight_layout()
