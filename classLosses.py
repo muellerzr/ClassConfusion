@@ -1,4 +1,5 @@
 import math
+import matplotlib.pyplot as plt
 from google.colab import widgets
 from fastai.vision import ClassificationInterpretation
 
