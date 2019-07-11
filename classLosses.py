@@ -5,7 +5,11 @@ from fastai.vision.image import image2np
 from google.colab import widgets
 from fastai.vision import ClassificationInterpretation
 
-def ClassLosses(interp:ClassificationInterpretation, k:float, class_1:str, class_2:str):
+def ClassLosses(interp:ClassificationInterpretation, k:float, class_1:str, class_2:str, **kwargs):
+    if ('figsize' in kwargs):
+        figsize = kwargs['figsize']
+    else:
+        figsize = (8,8)
     c1, c2 = class_1, class_2
     val, idxs = interp.top_losses(len(interp.losses))
     tb1 = str(class_1 + ' x ' + class_2)
@@ -31,7 +35,7 @@ def ClassLosses(interp:ClassificationInterpretation, k:float, class_1:str, class
     tb = widgets.TabBar([str(c1 + ' x ' + c2),
               str(c2 + ' x ' + c1)])
     with tb.output_to(tb1):
-      fig1, axes1 = plt.subplots(rows, cols, figsize=(8,8))
+      fig1, axes1 = plt.subplots(rows, cols, figsize=figsize)
       [axi.set_axis_off() for axi in axes1.ravel()]
       for i, idx in enumerate(idxs):
         if k < x1+1 or x1 > rg1:
@@ -48,7 +52,7 @@ def ClassLosses(interp:ClassificationInterpretation, k:float, class_1:str, class
       
       fig1.show()
     with tb.output_to(tb2):
-        fig2, axes2 = plt.subplots(rows, cols, figsize=(8,8))
+        fig2, axes2 = plt.subplots(rows, cols, figsize=figsize)
         [axi.set_axis_off() for axi in axes2.ravel()]
         for i, idx in enumerate(idxs):
           if k < x2+1 or x2 > rg2:
