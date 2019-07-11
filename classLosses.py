@@ -1,4 +1,5 @@
 import math
+from google.colab import widgets
 from fastai.vision import ClassificationInterpretation
 
 def ClassLosses(interp:ClassificationInterpretation, k:float, class_1:str, class_2:str):
