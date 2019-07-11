@@ -1,4 +1,5 @@
 import math
+import numpy as np
 import matplotlib.pyplot as plt
 from fastai.vision.image import image2np
 from google.colab import widgets
