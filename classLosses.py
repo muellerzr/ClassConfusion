@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from pandas import DataFrame
 from itertools import permutations
 from fastai.vision.image import image2np
 from google.colab import widgets
