@@ -57,7 +57,7 @@ class TabularAnalysis():
         df.loc[i] = arr
     self.create_graphs(df, cat_names)
   
-def ClassLosses(self, interp:ClassificationInterpretation, k:float, classes:list, **kwargs):
+def ClassLosses(interp:ClassificationInterpretation, k:float, classes:list, **kwargs):
     if ('figsize' in kwargs):
         figsize = kwargs['figsize']
     else:
