@@ -9,12 +9,14 @@ from fastai.vision import ClassificationInterpretation
 
 class ClassLosses():
   "Plot the most confused datapoints and statistics for your misses. \nPass in a `Learner` object and a list of classes to look at."
-  def __init__(self, interp:ClassificationInterpretation, classlist:list):
+  def __init__(self, interp:ClassificationInterpretation, classlist:list, is_ordered:bool=False):
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
       self.means = interp.learn.data.train_ds.x.processor[0].procs[2].means
       self.stds = interp.learn.data.train_ds.x.processor[0].procs[2].stds
+    self.is_ordered = is_ordered
     self.show_losses(classlist)
+    
     
   def create_graphs(self, df_list:list, cat_names:list):
     cols = math.ceil(math.sqrt(len(df_list)))
@@ -25,7 +27,7 @@ class ClassLosses():
     tbnames = tbnames[1:]
     tb = widgets.TabBar(tbnames)
     
-    
+    print('Variable Distrobution:')
     for i, tab in enumerate(tbnames):
       with tb.output_to(i):
         
@@ -60,8 +62,11 @@ class ClassLosses():
       cat_names = self.interp.data.x.cat_names
       cont_names = self.interp.data.x.cont_names
       arr1 = []
-      comb = list(permutations(classl,2))
-      print('Variable Distrobution:')
+      if self.is_ordered == False:
+        comb = list(permutations(classl,2))
+      else:
+        comb = classl
+      
       df = pd.DataFrame(columns=[['Original'] + cat_names + cont_names])
       for i, idx in enumerate(tl_idx):
         da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
@@ -94,7 +99,10 @@ class ClassLosses():
       self.create_graphs(arr1, cat_names)
       
   def im_losses(self, classl:list, **kwargs):
-      comb = list(permutations(classl, 2))
+      if self.is_ordered == False:
+        comb = list(permutations(classl, 2))
+      else:
+        comb = classl
       tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
 
       classes_gnd = self.interp.data.classes
