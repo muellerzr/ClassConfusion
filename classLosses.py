@@ -100,10 +100,10 @@ class ClassLosses():
           row = (int)(x / cols)
           col = x % cols
 
-        ix = int(cl)
-        if str(cl) == tab[0] and str(classes_gnd[interp.pred_class[idx]]) == tab[1]:
-          da = image2np(da.data*255).astype(np.uint8)
-          axes[row, col].imshow(da)
-          x += 1
-        with tb.output_to(tab):
-         plt.show() 
+          ix = int(cl)
+          if str(cl) == tab[0] and str(classes_gnd[interp.pred_class[idx]]) == tab[1]:
+            da = image2np(da.data*255).astype(np.uint8)
+            axes[row, col].imshow(da)
+            x += 1
+        with tb.output_to(i):
+         plt.tight_layout()
