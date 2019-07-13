@@ -9,6 +9,7 @@ from itertools import permutations
 from fastai.vision.image import image2np
 from google.colab import widgets
 from fastai.vision import ClassificationInterpretation
+from fastai.tabular import *
 
 class ClassLosses():
   def __init__(self, interp:ClassificationInterpretation):
