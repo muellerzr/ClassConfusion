@@ -67,7 +67,7 @@ class ClassLosses():
       ranges = []
       tbnames = []
       
-      k = input('Please enter a value for `k`')
+      k = input('Please enter a value for `k`: ')
       k = int(k)
       
       for x in iter(vals):
