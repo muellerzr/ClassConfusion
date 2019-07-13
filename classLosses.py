@@ -1,8 +1,9 @@
 import math
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from itertools import permutations
-import seaborn as sns
 from google.colab import widgets
 from seaborn import distplot
 from fastai.vision import ClassificationInterpretation
