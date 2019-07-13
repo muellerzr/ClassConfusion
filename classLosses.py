@@ -1,4 +1,5 @@
 import math
+import pandas as pd
 
 from itertools import permutations
 import seaborn as sns
