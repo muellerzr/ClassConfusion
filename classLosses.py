@@ -10,6 +10,7 @@ from fastai.vision import *
 from fastai.tabular import *
 
 class ClassLosses():
+  "Plot the most confused datapoints and statistics for your misses"
   def __init__(self, interp:ClassificationInterpretation, classlist:list):
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
