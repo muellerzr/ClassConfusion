@@ -12,8 +12,9 @@ from fastai.tabular import *
 class ClassLosses():
   def __init__(self, interp:ClassificationInterpretation):
     self.interp = interp
-    self.means = interp.learn.data.train_ds.x.processor[0].procs[2].means
-    self.stds = interp.learn.data.train_ds.x.processor[0].procs[2].stds
+    if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
+      self.means = interp.learn.data.train_ds.x.processor[0].procs[2].means
+      self.stds = interp.learn.data.train_ds.x.processor[0].procs[2].stds
     
   def create_graphs(self, df:pd.DataFrame, cat_names:list):
     cols = math.ceil(math.sqrt(len(df.columns)))
