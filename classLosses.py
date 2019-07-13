@@ -42,7 +42,8 @@ class ClassLosses():
             vals = vals * self.stds[tab] + self.means[tab]
             ttl = str.join('', df_list[j].columns[0])
             
-            fig = vals.plot(kind='hist', normed=True, title= ttl + ' ' + tbnames[i]+' distrobution', rot=30, ax=ax[j])
+            fig = vals.plot(kind='hist', normed=True, title= ttl + ' ' + tbnames[i] +' distrobution', 
+                            rot=30, ax=ax[j], range=[min(vals), max(vals)])
             
         plt.tight_layout()
   
