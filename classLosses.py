@@ -79,7 +79,7 @@ class ClassLosses():
       tb = widgets.TabBar(tbnames)
       
       for i, tab in enumerate(tbnames):
-        with tb.output_to(i):
+        with tb.output_to(tab):
           
           x = 0          
           if ranges[i] < k:
@@ -107,4 +107,3 @@ class ClassLosses():
             da = image2np(da.data*255).astype(np.uint8)
             axes[row, col].imshow(da)
             x += 1
-        plt.tight_layout()
