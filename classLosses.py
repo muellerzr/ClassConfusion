@@ -42,8 +42,10 @@ class ClassLosses():
             vals = vals * self.stds[tab] + self.means[tab]
             ttl = str.join('', df_list[j].columns[0])
             
+            k = min(data, key = lambda t: t[1])
+            l = max(data, key = lambda t: t[1])
             fig = vals.plot(kind='hist', normed=True, title= ttl + ' ' + tbnames[i] +' distrobution', 
-                            rot=30, ax=ax[j], range=[int(min(vals)), int(max(vals))])
+                            rot=30, ax=ax[j], range=[int(k), int(l)])
             
         plt.tight_layout()
   
