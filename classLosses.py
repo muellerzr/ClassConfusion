@@ -79,31 +79,31 @@ class ClassLosses():
       tb = widgets.TabBar(tbnames)
       
       for i, tab in enumerate(tbnames):
-        with tb.output_to(tab):
-          
-          x = 0          
-          if ranges[i] < k:
-            cols = math.ceil(math.sqrt(ranges[i]))
-            rows = math.ceil(ranges[i]/cols)
-          
-          if ranges[i] < 4:
-            cols, rows = 2, 2
-          
-          else:
-            cols = math.ceil(math.sqrt(k))
-            rows = math.ceil(k/cols)
-          
-          fig, axes = plt.subplots(rows, cols, figsize=(8,8))
-          [axi.set_axis_off() for axi in axes.ravel()]
-          for j, idx in enumerate(tl_idx):
-            if k < x+1 or x > ranges[i]:
-              break
-            da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
-            row = (int)(x / cols)
-            col = x % cols
+        x = 0          
+        if ranges[i] < k:
+          cols = math.ceil(math.sqrt(ranges[i]))
+          rows = math.ceil(ranges[i]/cols)
 
-          ix = int(cl)
-          if str(cl) == tab[0] and str(classes_gnd[interp.pred_class[idx]]) == tab[1]:
-            da = image2np(da.data*255).astype(np.uint8)
-            axes[row, col].imshow(da)
-            x += 1
+        if ranges[i] < 4:
+          cols, rows = 2, 2
+
+        else:
+          cols = math.ceil(math.sqrt(k))
+          rows = math.ceil(k/cols)
+
+        fig, axes = plt.subplots(rows, cols, figsize=(8,8))
+        [axi.set_axis_off() for axi in axes.ravel()]
+        for j, idx in enumerate(tl_idx):
+          if k < x+1 or x > ranges[i]:
+            break
+          da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
+          row = (int)(x / cols)
+          col = x % cols
+
+        ix = int(cl)
+        if str(cl) == tab[0] and str(classes_gnd[interp.pred_class[idx]]) == tab[1]:
+          da = image2np(da.data*255).astype(np.uint8)
+          axes[row, col].imshow(da)
+          x += 1
+        with tb.output_to(tab):
+         plt.show() 
