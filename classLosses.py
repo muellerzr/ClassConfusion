@@ -89,7 +89,8 @@ class ClassLosses():
             cols, rows = 2, 2
           
           else:
-            cols, rows = math.ceil(math.sqrt(k)), math.ceil(k/cols)
+            cols = math.ceil(math.sqrt(k)), 
+            rows = math.ceil(k/cols)
           
           fig, axes = plt.subplots(rows, cols, figsize=(8,8))
           [axi.set_axis_off() for axi in axes.ravel()]
