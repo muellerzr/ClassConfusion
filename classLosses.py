@@ -56,8 +56,8 @@ class ClassLosses():
       cont_names = self.interp.data.x.cont_names
       arr1 = []
       comb = list(permutations(classl,2))
+      print('Variable Distrobution:')
       for j, x in enumerate(comb):
-        print(comb)
         df = pd.DataFrame(columns=[[str(comb[j])] + cat_names + cont_names])
         for i, idx in enumerate(tl_idx):
           da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
@@ -91,7 +91,7 @@ class ClassLosses():
             if x[0:2] == y:
               ranges.append(x[2])
               tbnames.append(str(x[0] + ' | ' + x[1]))
-
+        print('Misclassified Pictures:')
         tb = widgets.TabBar(tbnames)
 
         for i, tab in enumerate(tbnames):
