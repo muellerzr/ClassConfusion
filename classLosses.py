@@ -102,9 +102,9 @@ class ClassLosses():
             row = (int)(x / cols)
             col = x % cols
 
-          ix = int(cl)
-          if str(cl) == tab.split(' ')[0] and str(classes_gnd[interp.pred_class[idx]]) == tab.split(' ')[2]:
-            da = image2np(da.data*255).astype(np.uint8)
-            axes[row, col].imshow(da)
-            x += 1
-        plt.tight_layout()
+            ix = int(cl)
+            if str(cl) == tab.split(' ')[0] and str(classes_gnd[interp.pred_class[idx]]) == tab.split(' ')[2]:
+              da = image2np(da.data*255).astype(np.uint8)
+              axes[row, col].imshow(da)
+              x += 1
+          plt.tight_layout()
