@@ -67,7 +67,7 @@ class ClassLosses():
       tbnames = []
       
       k = input('Please enter a value for `k`')
-      k = float(k)
+      k = int(k)
       
       for x in iter(vals):
         for y in iter(comb):
@@ -89,7 +89,7 @@ class ClassLosses():
             cols, rows = 2, 2
           
           else:
-            cols = math.ceil(math.sqrt(k)), 
+            cols = math.ceil(math.sqrt(k))
             rows = math.ceil(k/cols)
           
           fig, axes = plt.subplots(rows, cols, figsize=(8,8))
