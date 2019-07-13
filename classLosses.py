@@ -67,7 +67,7 @@ class ClassLosses():
       tbnames = []
       
       k = input('Please enter a value for `k`')
-      k = int(k)
+      k = float(k)
       
       for x in iter(vals):
         for y in iter(comb):
