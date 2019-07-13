@@ -63,7 +63,7 @@ class ClassLosses():
       k = int(k)
       self.imgClassLosses(self.interp, k, classl)
   
-  def imgClassLosses(interp:ClassificationInterpretation, k:float, classes:list, **kwargs):
+  def imgClassLosses(self, interp:ClassificationInterpretation, k:float, classes:list, **kwargs):
       if ('figsize' in kwargs):
           figsize = kwargs['figsize']
       else:
