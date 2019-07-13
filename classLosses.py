@@ -59,51 +59,58 @@ class ClassLosses():
       self.create_graphs(df, cat_names)
     
     else:
-      comb = list(permutations(classl, 2))
-      tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
-      
-      classes_gnd = self.interp.data.classes
-      vals = self.interp.most_confused()
-      ranges = []
-      tbnames = []
-      
-      k = input('Please enter a value for `k`')
+      k = input('Please enter a value for `k` ')
       k = int(k)
-      
-      for x in iter(vals):
-        for y in iter(comb):
-          if x[0:2] == y:
-            ranges.append(x[2])
-            tbnames.append(str(x[0] + ' | ' + x[1]))
-      
-      tb = widgets.TabBar(tbnames)
-      
-      for i, tab in enumerate(tbnames):
-        with tb.output_to(i):
-          x = 0          
-          if ranges[i] < k:
-            cols = math.ceil(math.sqrt(ranges[i]))
-            rows = math.ceil(ranges[i]/cols)
+      imgClassLosses(self.interp, k, classl)
+  
+def imgClassLosses(interp:ClassificationInterpretation, k:float, classes:list, **kwargs):
+    if ('figsize' in kwargs):
+        figsize = kwargs['figsize']
+    else:
+        figsize = (8,8)
+    comb = list(permutations(classes, 2))
+    val, idxs = interp.top_losses(len(interp.losses))
 
-          if ranges[i] < 4:
-            cols, rows = 2, 2
+    cols = math.ceil(math.sqrt(k))
+    rows = math.ceil(k/cols)
 
-          else:
-            cols = math.ceil(math.sqrt(k))
-            rows = math.ceil(k/cols)
+    classes_gnd = interp.data.classes
 
-          fig, axes = plt.subplots(rows, cols, figsize=(8,8))
-          [axi.set_axis_off() for axi in axes.ravel()]
-          for j, idx in enumerate(tl_idx):
-            if k < x+1 or x > ranges[i]:
-              break
-            da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
-            row = (int)(x / cols)
-            col = x % cols
+    vals = interp.most_confused()
+    ranges = []
+    tbnames = []
 
-            ix = int(cl)
-            if str(cl) == tab[0] and str(classes_gnd[interp.pred_class[idx]]) == tab[1]:
-              da = image2np(da.data*255).astype(np.uint8)
-              axes[row, col].imshow(da)
-              x += 1
-          plt.tight_layout()
+    
+    for x in iter(vals):
+      for y in iter(comb):
+        if x[0:2] == y:
+          ranges.append(x[2])
+          tbnames.append(str(x[0] + ' | ' + x[1])) 
+  
+    tb = widgets.TabBar(tbnames)
+        
+    for i, tab in enumerate(tbnames):
+      with tb.output_to(i):
+        x = 0
+        
+        if ranges[i] < k:
+          cols = math.ceil(math.sqrt(ranges[i]))
+          rows = math.ceil(k/cols)
+        if ranges[i] < 4:
+          cols = 2
+          rows = 2
+        fig, axes = plt.subplots(rows, cols, figsize=figsize)
+        [axi.set_axis_off() for axi in axes.ravel()]
+        for j, idx in enumerate(idxs):
+          if k < x+1 or x > ranges[i]:
+            break
+          da, cl = interp.data.dl(interp.ds_type).dataset[idx]
+          row = (int)(x / cols)
+          col = x % cols
+
+          ix = int(cl)
+          if str(cl) == tab[0] and str(classes_gnd[interp.pred_class[idx]]) == tab[1]:
+            da = image2np(da.data*255).astype(np.uint8)
+            axes[row, col].imshow(da)
+            x += 1
+        plt.tight_layout()
