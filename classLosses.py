@@ -1,15 +1,13 @@
 import math
-import seaborn as sns
 
 from itertools import permutations
-from fastai.vision.image import image2np
+import seaborn as sns
 from google.colab import widgets
-from fastai.vision import *
-from fastai.tabular import *
+from seaborn import distplot
 
 class ClassLosses():
   "Plot the most confused datapoints and statistics for your misses. \nPass in a `Learner` object and a list of classes to look at."
-  def __init__(self, learn:Learner, classlist:list):
+  def __init__(self, interp:ClassificationInterpretation, classlist:list):
     interp = ClassificationInterpretation.from_learner(learn)
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
@@ -42,7 +40,7 @@ class ClassLosses():
             vals = df_list[j][tab].astype(float)
             vals = vals * self.stds[tab] + self.means[tab]
             ttl = str.join('', df_list[j].columns[0])
-            sns.distplot(ax=ax[j],a=vals).set_title(ttl + ' ' + tbnames[i]+' distrobution')
+            distplot(ax=ax[j],a=vals).set_title(ttl + ' ' + tbnames[i]+' distrobution')
         plt.tight_layout()
   
   def show_losses(self, classl:list, **kwargs):
