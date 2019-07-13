@@ -10,11 +10,12 @@ from fastai.vision import *
 from fastai.tabular import *
 
 class ClassLosses():
-  def __init__(self, interp:ClassificationInterpretation):
+  def __init__(self, interp:ClassificationInterpretation, classlist:list):
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
       self.means = interp.learn.data.train_ds.x.processor[0].procs[2].means
       self.stds = interp.learn.data.train_ds.x.processor[0].procs[2].stds
+    self.show_losses(self, classlist)
     
   def create_graphs(self, df:pd.DataFrame, cat_names:list):
     cols = math.ceil(math.sqrt(len(df.columns)))
@@ -94,7 +95,7 @@ class ClassLosses():
           
           fig, axes = plt.subplots(rows, cols, figsize=(8,8))
           [axi.set_axis_off() for axi in axes.ravel()]
-          for j, idx in enumerate(idxs):
+          for j, idx in enumerate(tl_idx):
             if k < x+1 or x > ranges[i]:
               break
             da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
