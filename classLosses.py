@@ -3,8 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import scipy.stats as stats
-
 from itertools import permutations
 from google.colab import widgets
 from fastai.vision import ClassificationInterpretation
@@ -44,10 +42,8 @@ class ClassLosses():
             vals = vals * self.stds[tab] + self.means[tab]
             ttl = str.join('', df_list[j].columns[0])
             
-            fit = stats.norm.pdf(vals, self.stds[tab], self.means[tab])
-            plt.plot(vals, fit, '-o')
-            plt.hist(vals, normed=True, title= ttl + ' ' + tbnames[i] +' distrobution', 
-                            rot=30, ax=ax[j])
+            fig = vals.plot(kind='hist', normed=True, title= ttl + ' ' + tbnames[i] +' distrobution', 
+                            rot=30, ax=ax[j], range=[min(vals), max(vals)])
             
         plt.tight_layout()
   
