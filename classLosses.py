@@ -5,7 +5,7 @@ import seaborn as sns
 
 from itertools import permutations
 from google.colab import widgets
-from seaborn import distplot
+from seaborn import distplot, distributions
 from fastai.vision import ClassificationInterpretation
 
 class ClassLosses():
@@ -42,7 +42,8 @@ class ClassLosses():
             vals = df_list[j][tab].astype(float)
             vals = vals * self.stds[tab] + self.means[tab]
             ttl = str.join('', df_list[j].columns[0])
-            distplot(ax=ax[j],a=vals).set_title(ttl + ' ' + tbnames[i]+' distrobution')
+            bins = int(min(distributions._freedman_diaconis_bins(vals), 50))
+            distplot(ax=ax[j],a=vals, bins=bins).set_title(ttl + ' ' + tbnames[i]+' distrobution')
         plt.tight_layout()
   
   def show_losses(self, classl:list, **kwargs):
