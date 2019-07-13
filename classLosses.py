@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-from pandas import DataFrame
+from pandas import DataFrame, value_counts
 from itertools import permutations
 from fastai.vision.image import image2np
 from google.colab import widgets
@@ -29,7 +29,7 @@ class ClassLosses():
         row = (int)(i / cols)
         col = i % cols
         if tab in cat_names:
-          vals = pd.value_counts(df[tab])
+          vals = value_counts(df[tab])
           fig = vals.plot(kind='bar', title=tbnames[i]+' distrobution', rot=30)
         else:
           vals = df[tab].astype(float)
@@ -44,7 +44,7 @@ class ClassLosses():
       classes = self.interp.data.classes
       cat_names = self.interp.data.x.cat_names
       cont_names = self.interp.data.x.cont_names
-      df = pd.DataFrame(columns=[cat_names + cont_names])
+      df = DataFrame(columns=[cat_names + cont_names])
       for i, idx in enumerate(tl_idx):
         da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
         cl = int(cl)
