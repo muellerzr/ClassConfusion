@@ -4,11 +4,11 @@ from itertools import permutations
 import seaborn as sns
 from google.colab import widgets
 from seaborn import distplot
+from fastai.vision import ClassificationInterpretation
 
 class ClassLosses():
   "Plot the most confused datapoints and statistics for your misses. \nPass in a `Learner` object and a list of classes to look at."
   def __init__(self, interp:ClassificationInterpretation, classlist:list):
-    interp = ClassificationInterpretation.from_learner(learn)
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
       self.means = interp.learn.data.train_ds.x.processor[0].procs[2].means
