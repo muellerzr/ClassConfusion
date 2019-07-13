@@ -17,46 +17,59 @@ class ClassLosses():
       self.stds = interp.learn.data.train_ds.x.processor[0].procs[2].stds
     self.show_losses(classlist)
     
-  def create_graphs(self, df:pd.DataFrame, cat_names:list):
-    cols = math.ceil(math.sqrt(len(df.columns)))
-    rows = math.ceil(len(df.columns)/cols)
-    df.columns = df.columns.get_level_values(0)
-    tbnames = list(df.columns)
+  def create_graphs(self, df_list:list, cat_names:list):
+    cols = math.ceil(math.sqrt(len(df_list)))
+    rows = math.ceil(len(df_list)/cols)
+    df_list[0].columns = df_list[0].columns.get_level_values(0)
+    tbnames = list(df_list[0].columns)
     tbnames.sort()
+    tbnames = tbnames[1:]
     tb = widgets.TabBar(tbnames)
+    
+    
     for i, tab in enumerate(tbnames):
       with tb.output_to(i):
-        row = (int)(i / cols)
-        col = i % cols
-        if tab in cat_names:
-          vals = pd.value_counts(df[tab])
-          fig = vals.plot(kind='bar', title=tbnames[i]+' distrobution', rot=30)
-        else:
-          vals = df[tab].astype(float)
-          vals = vals * self.stds[tab] + self.means[tab]
-          sns.distplot(vals).set_title(tbnames[i]+' distrobution')
+        
+        fig, ax = plt.subplots(len(df_list), figsize=(8,8))
+        for j, x in enumerate(df_list):
+          row = (int)(j / cols)
+          col = j % cols
+          if tab in cat_names:
+            vals = pd.value_counts(df_list[j][tab].values.flatten())
+            ttl = str.join('', df_list[j].columns[0])
+            fig = vals.plot(kind='bar', title= ttl + ' ' + tbnames[i]+' distrobution', rot=30, ax=ax[j])
+          else:
+            vals = df_list[j][tab].astype(float)
+            vals = vals * self.stds[tab] + self.means[tab]
+            ttl = str.join('', df_list[j].columns[0])
+            sns.distplot(ax=ax[j],a=vals).set_title(ttl + ' ' + tbnames[i]+' distrobution')
+        plt.tight_layout()
   
   def show_losses(self, classl:list, **kwargs):
     if str(type(self.interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
-      if len(classl) > 2:
-        print('Warning: More than two classes has not been implemented yet.\nThe current layout is first position will be the truth, the second will be prediction')
+      
       tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
       classes = self.interp.data.classes
       cat_names = self.interp.data.x.cat_names
       cont_names = self.interp.data.x.cont_names
-      df = pd.DataFrame(columns=[cat_names + cont_names])
-      for i, idx in enumerate(tl_idx):
-        da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
-        cl = int(cl)
-        t1 = str(da)
-        t1 = t1.split(';')
-        if classes[self.interp.pred_class[idx]] == classl[0] and classes[cl] == classl[1]:
-          arr = []
-          for x in range(len(t1)-1):
-              _, value = t1[x].rsplit(' ', 1)
-              arr.append(value)
-          df.loc[i] = arr
-      self.create_graphs(df, cat_names)
+      arr1 = []
+      comb = list(permutations(classl,2))
+      for j, x in enumerate(comb):
+        df = pd.DataFrame(columns=[[str(x)] + cat_names + cont_names])
+        for i, idx in enumerate(tl_idx):
+          da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
+          cl = int(cl)
+          t1 = str(da)
+          t1 = t1.split(';')
+          if classes[self.interp.pred_class[idx]] == comb[j][0] and classes[cl] == comb[j][1]:
+            arr = []
+            arr.append(x)
+            for x in range(len(t1)-1):
+                _, value = t1[x].rsplit(' ', 1)
+                arr.append(value)
+            df.loc[i] = arr
+        arr1.append(df)
+      self.create_graphs(arr1, cat_names)
     
     else:
       comb = list(permutations(classl, 2))
