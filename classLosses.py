@@ -43,13 +43,18 @@ class ClassLosses():
             ttl = str.join('', df_list[j].columns[0])
             
             axs = vals.plot(kind='hist', ax=ax[j])
-            vals.plot(kind='kde', ax=axs, secondary_y=True)
+            vals.plot(kind='kde', ax=axs, title = ttl + ' ' + tbnames[i]+' distrobution', secondary_y=True)
             
         plt.tight_layout()
   
   def show_losses(self, classl:list, **kwargs):
     if str(type(self.interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
+      self.tab_losses(classl)
+    else:
+      self.im_losses(classl)
       
+      
+  def tab_losses(self, classl:list, **kwargs):
       tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
       classes = self.interp.data.classes
       cat_names = self.interp.data.x.cat_names
@@ -57,6 +62,20 @@ class ClassLosses():
       arr1 = []
       comb = list(permutations(classl,2))
       print('Variable Distrobution:')
+      df = pd.DataFrame(columns=[['Original'] + cat_names + cont_names])
+      for i, idx in enumerate(tl_idx):
+        da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
+        cl = int(cl)
+        tl = str(da)
+        tl = tl.split(';')
+        arr = []
+        arr.append('Original')
+        for x in range(len(tl)-1):
+          _, value = tl[x].rsplit(' ', 1)
+          arr.append(value)
+        df.loc[i] = arr
+      arr1.append(df)
+      
       for j, x in enumerate(comb):
         df = pd.DataFrame(columns=[[str(comb[j])] + cat_names + cont_names])
         for i, idx in enumerate(tl_idx):
@@ -74,55 +93,56 @@ class ClassLosses():
         arr1.append(df)
       self.create_graphs(arr1, cat_names)
       
-    else:
-        comb = list(permutations(classl, 2))
-        tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
+  def im_losses(self, classl:list, **kwargs):
+      comb = list(permutations(classl, 2))
+      tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
 
-        classes_gnd = self.interp.data.classes
-        vals = self.interp.most_confused()
-        ranges = []
-        tbnames = []
+      classes_gnd = self.interp.data.classes
+      vals = self.interp.most_confused()
+      ranges = []
+      tbnames = []
 
-        k = input('Please enter a value for `k`: ')
-        k = int(k)
+      k = input('Please enter a value for `k`: ')
+      k = int(k)
 
-        for x in iter(vals):
-          for y in iter(comb):
-            if x[0:2] == y:
-              ranges.append(x[2])
-              tbnames.append(str(x[0] + ' | ' + x[1]))
-        print('Misclassified Pictures:')
-        tb = widgets.TabBar(tbnames)
+      for x in iter(vals):
+        for y in iter(comb):
+          if x[0:2] == y:
+            ranges.append(x[2])
+            tbnames.append(str(x[0] + ' | ' + x[1]))
+      print('Misclassified Pictures:')
+      tb = widgets.TabBar(tbnames)
 
-        for i, tab in enumerate(tbnames):
-          with tb.output_to(i):
+      for i, tab in enumerate(tbnames):
+        with tb.output_to(i):
 
-            x = 0          
-            if ranges[i] < k:
-              cols = math.ceil(math.sqrt(ranges[i]))
-              rows = math.ceil(ranges[i]/cols)
+          x = 0          
+          if ranges[i] < k:
+            cols = math.ceil(math.sqrt(ranges[i]))
+            rows = math.ceil(ranges[i]/cols)
 
-            if ranges[i] < 4:
-              cols, rows = 2, 2
+          if ranges[i] < 4:
+            cols, rows = 2, 2
 
-            else:
-              cols = math.ceil(math.sqrt(k))
-              rows = math.ceil(k/cols)
+          else:
+            cols = math.ceil(math.sqrt(k))
+            rows = math.ceil(k/cols)
 
-            fig, axes = plt.subplots(rows, cols, figsize=(8,8))
-            [axi.set_axis_off() for axi in axes.ravel()]
-            for j, idx in enumerate(tl_idx):
-              if k < x+1 or x > ranges[i]:
-                break
-              da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
-              row = (int)(x / cols)
-              col = x % cols
+          fig, axes = plt.subplots(rows, cols, figsize=(8,8))
+          [axi.set_axis_off() for axi in axes.ravel()]
+          for j, idx in enumerate(tl_idx):
+            if k < x+1 or x > ranges[i]:
+              break
+            da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
+            row = (int)(x / cols)
+            col = x % cols
 
-              ix = int(cl)
-              if str(cl) == tab.split(' ')[0] and str(classes_gnd[self.interp.pred_class[idx]]) == tab.split(' ')[2]:
-                da = image2np(da.data*255).astype(np.uint8)
-                axes[row, col].imshow(da)
-                x += 1
-            plt.tight_layout()
-
-    
+            ix = int(cl)
+            if str(cl) == tab.split(' ')[0] and str(classes_gnd[self.interp.pred_class[idx]]) == tab.split(' ')[2]:
+              img, lbl = data.valid_ds[idx]
+              img.show(ax=axes[row,col])
+              fn = self.interp.data.valid_ds.x.items[idx]
+              fn = re.search('([^/*]+)_\d+.*$', str(fn)).group(0)
+              axes[row, col].set_title(fn)
+              x += 1
+          plt.tight_layout()
