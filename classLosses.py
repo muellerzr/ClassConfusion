@@ -2,9 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import pandas as pd
 
-from pandas import DataFrame, value_counts
 from itertools import permutations
 from fastai.vision.image import image2np
 from google.colab import widgets
