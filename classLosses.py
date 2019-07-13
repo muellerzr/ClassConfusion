@@ -74,7 +74,7 @@ class ClassLosses():
         arr1.append(df)
       self.create_graphs(arr1, cat_names)
       
-     else:
+    else:
         comb = list(permutations(classl, 2))
         tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
 
