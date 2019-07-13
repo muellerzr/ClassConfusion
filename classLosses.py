@@ -15,7 +15,7 @@ class ClassLosses():
     self.means = interp.learn.data.train_ds.x.processor[0].procs[2].means
     self.stds = interp.learn.data.train_ds.x.processor[0].procs[2].stds
     
-  def create_graphs(self, df:DataFrame, cat_names:list):
+  def create_graphs(self, df:pd.DataFrame, cat_names:list):
     cols = math.ceil(math.sqrt(len(df.columns)))
     rows = math.ceil(len(df.columns)/cols)
     df.columns = df.columns.get_level_values(0)
@@ -27,7 +27,7 @@ class ClassLosses():
         row = (int)(i / cols)
         col = i % cols
         if tab in cat_names:
-          vals = value_counts(df[tab])
+          vals = pd.value_counts(df[tab])
           fig = vals.plot(kind='bar', title=tbnames[i]+' distrobution', rot=30)
         else:
           vals = df[tab].astype(float)
@@ -42,7 +42,7 @@ class ClassLosses():
       classes = self.interp.data.classes
       cat_names = self.interp.data.x.cat_names
       cont_names = self.interp.data.x.cont_names
-      df = DataFrame(columns=[cat_names + cont_names])
+      df = pd.DataFrame(columns=[cat_names + cont_names])
       for i, idx in enumerate(tl_idx):
         da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
         cl = int(cl)
