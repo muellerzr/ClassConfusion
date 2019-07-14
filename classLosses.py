@@ -12,8 +12,9 @@ class ClassLosses():
   def __init__(self, interp:ClassificationInterpretation, classlist:list, is_ordered:bool=False):
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
-      self.means = interp.learn.data.train_ds.x.processor[0].procs[2].means
-      self.stds = interp.learn.data.train_ds.x.processor[0].procs[2].stds
+      if interp.learn.data.train_ds.x.cont_names != []: 
+        self.means = interp.learn.data.train_ds.x.processor[0].procs[2].means
+        self.stds = interp.learn.data.train_ds.x.processor[0].procs[2].stds
     self.is_ordered = is_ordered
     self.show_losses(classlist)
     
