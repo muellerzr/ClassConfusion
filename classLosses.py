@@ -11,7 +11,8 @@ class ClassLosses():
   """Plot the most confused datapoints and statistics for your misses. \n
   Pass in a `interp` object and a list of classes to look at. 
   Optionally you can include an odered list in the form of [[class_1, class_2]],\n 
-  a figure size, and a cut_off limit for the maximum categorical categories to use on a variable"""
+  a figure size, a cut_off limit for the maximum categorical categories to use on a variable,
+  and a variable list to use"""
   def __init__(self, interp:ClassificationInterpretation, classlist:list, 
                is_ordered:bool=False, cut_off:int=100, varlist:list=list(),
                figsize:tuple=(8,8)):
