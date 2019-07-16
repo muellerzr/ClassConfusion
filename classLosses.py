@@ -1,20 +1,16 @@
-import math
-import pandas as pd
-import matplotlib.pyplot as plt
-
-from itertools import permutations
-from google.colab import widgets
-from fastai.vision import ClassificationInterpretation
-
 class ClassLosses():
   "Plot the most confused datapoints and statistics for your misses. \nPass in a `interp` object and a list of classes to look at."
-  def __init__(self, interp:ClassificationInterpretation, classlist:list, is_ordered:bool=False):
+  def __init__(self, interp:ClassificationInterpretation, classlist:list, is_ordered:bool=False, cut_off:int=100, figsize:tuple=(8,8)):
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
       if interp.learn.data.train_ds.x.cont_names != []: 
-        self.means = interp.learn.data.train_ds.x.processor[0].procs[2].means
-        self.stds = interp.learn.data.train_ds.x.processor[0].procs[2].stds
+        for x in range(len(interp.learn.data.procs)):
+          if "Normalize" in str(interp.learn.data.procs[x]):
+            self.means = interp.learn.data.train_ds.x.processor[0].procs[x].means
+            self.stds = interp.learn.data.train_ds.x.processor[0].procs[x].stds
     self.is_ordered = is_ordered
+    self.cut_off = cut_off
+    self.figsize = figsize
     self.show_losses(classlist)
     
     
@@ -22,39 +18,47 @@ class ClassLosses():
     print('Variable Distrobution:')
     cols = math.ceil(math.sqrt(len(df_list)))
     rows = math.ceil(len(df_list)/cols)
+    if len(df_list) < 4:
+      cols = 2
+      rows = 2
     df_list[0].columns = df_list[0].columns.get_level_values(0)
     tbnames = list(df_list[0].columns)
-    tbnames.sort()
-    tbnames = tbnames[1:]
+    tbnames = tbnames[:-1]
     tb = widgets.TabBar(tbnames)
     
     
     for i, tab in enumerate(tbnames):
       with tb.output_to(i):
         
-        fig, ax = plt.subplots(len(df_list), figsize=(8,8))
+        fig, ax = plt.subplots(rows, cols, figsize=self.figsize)
         for j, x in enumerate(df_list):
           row = (int)(j / cols)
           col = j % cols
           if tab in cat_names:
-            vals = pd.value_counts(df_list[j][tab].values.flatten())
-            ttl = str.join('', df_list[j].columns[-1])
-            if j == 0:
-              title = ttl + ' ' + tbnames[i]+' distrobution'
+            if df_list[j][tab].nunique() > self.cut_off:
+              print(f'{tab} has too many unique values to graph well.')
             else:
-              title = 'Misclassified ' + ttl + ' ' + tbnames[i]+' distrobution'
-            fig = vals.plot(kind='bar', title= title, rot=30, ax=ax[j])
+              vals = pd.value_counts(df_list[j][tab].values)
+              ttl = str.join('', df_list[j].columns[-1])
+              if j == 0:
+                title = ttl + ' ' + tbnames[i]+' distrobution'
+              else:
+                title = 'Misclassified ' + ttl + ' ' + tbnames[i]+' distrobution'
+              fig = vals.plot(kind='bar', title= title, rot=30, ax=ax[row, col])
           else:
-            vals = df_list[j][tab].astype(float)
-            vals = vals * self.stds[tab] + self.means[tab]
+            vals = df_list[j][tab]
             ttl = str.join('', df_list[j].columns[-1])
             if j == 0:
               title = ttl + ' ' + tbnames[i] + ' distrobution'
             else:
               title = 'Misclassified ' + ttl + ' ' + tbnames[i]+' distrobution'
             
-            axs = vals.plot(kind='hist', ax=ax[j])
-            vals.plot(kind='kde', ax=axs, title = title, secondary_y=True)
+            axs = vals.plot(kind='hist', ax=ax[row, col], title=title, y='Frequency')
+            axs.set_ylabel('Frequency', color='g')
+            if len(set(vals)) > 1:
+              vals.plot(kind='kde', ax=axs, title = title, secondary_y=True)
+            else:
+              print('Less than two unique values, cannot graph the KDE')
             
         plt.tight_layout()
   
@@ -96,7 +100,7 @@ class ClassLosses():
         arr.append(res)
       f = pd.DataFrame([ x.split(';')[:-1] for x in arr], columns=da.names)
       for i, var in enumerate(self.interp.data.cont_names):
-        f[var] = f[var].apply(lambda x: float(x) * norm.stds[var] + norm.means[var])
+        f[var] = f[var].apply(lambda x: float(x) * self.stds[var] + self.means[var])
       f['Original'] = 'Original'
       dfarr.append(f)
       
@@ -122,8 +126,7 @@ class ClassLosses():
             arr.append(res)      
         f = pd.DataFrame([ x.split(';')[:-1] for x in arr], columns=da.names)
         for i, var in enumerate(self.interp.data.cont_names):
-          f[var] = f[var].apply(lambda x: float(x) * norm.stds[var] + norm.means[var])
+          f[var] = f[var].apply(lambda x: float(x) * self.stds[var] + self.means[var])
         f[str(x)] = str(x)
         dfarr.append(f)
-      
       self.create_graphs(dfarr, cat_names)
