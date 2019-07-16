@@ -1,20 +1,16 @@
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 from itertools import permutations
 from google.colab import widgets
 from fastai.vision import ClassificationInterpretation
 
 class ClassLosses():
-  """Plot the most confused datapoints and statistics for your misses. 
-  \nPass in a `interp` object and a list of classes to look at. 
-  Optionally you can include an odered list in the form of [[class_1, class_2]],
-  \n a figure size, and a cut_off limit for the maximum categorical categories to use on a variable"""
+  "Plot the most confused datapoints and statistics for your misses. \nPass in a `interp` object and a list of classes to look at. Optionally you can include an odered list in the form of [[class_1, class_2]],\n a figure size, and a cut_off limit for the maximum categorical categories to use on a variable"
   def __init__(self, interp:ClassificationInterpretation, classlist:list, 
                is_ordered:bool=False, cut_off:int=100, varlist:list=list(),
-               figsize:tuple=(8,8)):
+               figsize:tuple=(8,8), export:bool=False):
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
       if interp.learn.data.train_ds.x.cont_names != []: 
@@ -26,6 +22,7 @@ class ClassLosses():
     self.cut_off = cut_off
     self.figsize = figsize
     self.vars = varlist
+    self.export = export
     self.show_losses(classlist)
     
     
@@ -46,7 +43,8 @@ class ClassLosses():
     for i, tab in enumerate(self.tbnames):
       with tb.output_to(i):
         self.create_graphs(tab, df_list, cat_names)
-
+    if self.export == True:
+        self.export_pdf(df_list, cat_names)
     
     
   def create_graphs(self, tab:str, df_list:list, cat_names:list):
@@ -97,7 +95,17 @@ class ClassLosses():
       self.tab_losses(classl)
     else:
       self.im_losses(classl)
-
+      
+  def export_pdf(self, df_list:list, cat_names:list):
+    with PdfPages('VariableAnalysis.pdf') as pdf:
+      for i, tab in enumerate(self.tbnames):
+        self.create_graphs(tab, df_list, cat_names)
+        plt.title('Page One')
+        pdf.savefig()
+        pdf.attach_note(tab)
+        plt.close()
+      d = pdf.infodict()
+      d['Title'] = 'Results'
       
   def tab_losses(self, classl:list, **kwargs):
       tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
@@ -137,10 +145,10 @@ class ClassLosses():
       for j, x in enumerate(comb):
         arr = []
         for i, idx in enumerate(tl_idx):
-          da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
+          da, cl = interp.data.dl(interp.ds_type).dataset[idx]
           cl = int(cl)
           
-          if classes[self.interp.pred_class[idx]] == comb[j][0] and classes[cl] == comb[j][1]:
+          if classes[interp.pred_class[idx]] == comb[j][0] and classes[cl] == comb[j][1]:
             res = ''
             for c, n in zip(da.cats, da.names[:len(da.cats)]):
               string = f'{da.classes[n][c]}'
@@ -159,3 +167,60 @@ class ClassLosses():
         f[str(x)] = str(x)
         dfarr.append(f)
       self.create_tabs(dfarr, cat_names)
+      
+  def im_losses(self, classl:list, **kwargs):
+    if self.is_ordered == False:
+      comb = list(permutations(classl, 2))
+    else:
+      comb = classl
+    tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
+
+    classes_gnd = self.interp.data.classes
+    vals = self.interp.most_confused()
+    ranges = []
+    tbnames = []
+
+    k = input('Please enter a value for `k`: ')
+    k = int(k)
+
+    for x in iter(vals):
+      for y in iter(comb):
+        if x[0:2] == y:
+          ranges.append(x[2])
+          tbnames.append(str(x[0] + ' | ' + x[1]))
+    print('Misclassified Pictures:')
+    tb = widgets.TabBar(tbnames)
+
+    for i, tab in enumerate(tbnames):
+      with tb.output_to(i):
+
+        x = 0          
+        if ranges[i] < k:
+          cols = math.ceil(math.sqrt(ranges[i]))
+          rows = math.ceil(ranges[i]/cols)
+
+        if ranges[i] < 4:
+          cols, rows = 2, 2
+
+        else:
+          cols = math.ceil(math.sqrt(k))
+          rows = math.ceil(k/cols)
+
+        fig, axes = plt.subplots(rows, cols, figsize=(8,8))
+        [axi.set_axis_off() for axi in axes.ravel()]
+        for j, idx in enumerate(tl_idx):
+          if k < x+1 or x > ranges[i]:
+            break
+          da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
+          row = (int)(x / cols)
+          col = x % cols
+
+          ix = int(cl)
+          if str(cl) == tab.split(' ')[0] and str(classes_gnd[self.interp.pred_class[idx]]) == tab.split(' ')[2]:
+            img, lbl = data.valid_ds[idx]
+            img.show(ax=axes[row,col])
+            fn = self.interp.data.valid_ds.x.items[idx]
+            fn = re.search('([^/*]+)_\d+.*$', str(fn)).group(0)
+            axes[row, col].set_title(fn)
+            x += 1
+        plt.tight_layout()
