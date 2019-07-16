@@ -1,15 +1,8 @@
-import math
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-from itertools import permutations
-from google.colab import widgets
-from fastai.vision import ClassificationInterpretation
-
 class ClassLosses():
   "Plot the most confused datapoints and statistics for your misses. \nPass in a `interp` object and a list of classes to look at. Optionally you can include an odered list in the form of [[class_1, class_2]],\n a figure size, and a cut_off limit for the maximum categorical categories to use on a variable"
-  def __init__(self, interp:ClassificationInterpretation, classlist:list, is_ordered:bool=False, cut_off:int=100, figsize:tuple=(8,8)):
+  def __init__(self, interp:ClassificationInterpretation, classlist:list, 
+               is_ordered:bool=False, cut_off:int=100, varlist:list=list(),
+               figsize:tuple=(8,8)):
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
       if interp.learn.data.train_ds.x.cont_names != []: 
@@ -20,6 +13,7 @@ class ClassLosses():
     self.is_ordered = is_ordered
     self.cut_off = cut_off
     self.figsize = figsize
+    self.vars = varlist
     self.show_losses(classlist)
     
     
@@ -31,8 +25,11 @@ class ClassLosses():
       cols = 2
       rows = 2
     df_list[0].columns = df_list[0].columns.get_level_values(0)
-    tbnames = list(df_list[0].columns)
-    tbnames = tbnames[:-1]
+    if len(self.vars) > 0:
+      tbnames = self.vars
+    else:
+      tbnames = list(df_list[0].columns)
+      tbnames = tbnames[:-1]
     tb = widgets.TabBar(tbnames)
     
     
