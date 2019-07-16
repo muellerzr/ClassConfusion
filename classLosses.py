@@ -17,10 +17,10 @@ class ClassLosses():
                is_ordered:bool=False, cut_off:int=100, varlist:list=list(),
                figsize:tuple=(8,8)):
     self.interp = interp
-    if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
-      if interp.learn.data.train_ds.x.cont_names != []: 
-        for x in range(len(interp.learn.data.procs)):
-          if "Normalize" in str(interp.learn.data.procs[x]):
+    if str(type(self.interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
+      if self.interp.learn.data.train_ds.x.cont_names != []: 
+        for x in range(len(self.interp.learn.data.procs)):
+          if "Normalize" in str(self.interp.learn.data.procs[x]):
             self.means = interp.learn.data.train_ds.x.processor[0].procs[x].means
             self.stds = interp.learn.data.train_ds.x.processor[0].procs[x].stds
     self.is_ordered = is_ordered
@@ -127,10 +127,10 @@ class ClassLosses():
       for j, x in enumerate(comb):
         arr = []
         for i, idx in enumerate(tl_idx):
-          da, cl = interp.data.dl(interp.ds_type).dataset[idx]
+          da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
           cl = int(cl)
           
-          if classes[interp.pred_class[idx]] == comb[j][0] and classes[cl] == comb[j][1]:
+          if classes[self.interp.pred_class[idx]] == comb[j][0] and classes[cl] == comb[j][1]:
             res = ''
             for c, n in zip(da.cats, da.names[:len(da.cats)]):
               string = f'{da.classes[n][c]}'
