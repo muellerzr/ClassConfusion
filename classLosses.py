@@ -13,7 +13,7 @@ class ClassLosses():
   Optionally you can include an odered list in the form of [[class_1, class_2]],
   \n a figure size, and a cut_off limit for the maximum categorical categories to use on a variable"""
   def __init__(self, interp:ClassificationInterpretation, classlist:list, 
-               is_ordered:bool=False, cut_off:int=100, varlist:list=list(),
+               is_ordered:bool=False, cut_off:int=100, varlist:list=None,
                figsize:tuple=(8,8)):
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
@@ -36,7 +36,7 @@ class ClassLosses():
     if len(df_list) < 4:
       self.is_less = True
     df_list[0].columns = df_list[0].columns.get_level_values(0)
-    if len(self.vars) > 0:
+    if self.vars is not None:
       self.tbnames = self.vars
     else:
       tbnames = list(df_list[0].columns)
