@@ -1,5 +1,5 @@
 class ClassLosses():
-  "Plot the most confused datapoints and statistics for your misses. \nPass in a `interp` object and a list of classes to look at."
+  "Plot the most confused datapoints and statistics for your misses. \nPass in a `interp` object and a list of classes to look at. Optionally you can include an odered list in the form of [[class_1, class_2]],\n a figure size, and a cut_off limit for the maximum categorical categories to use on a variable"
   def __init__(self, interp:ClassificationInterpretation, classlist:list, is_ordered:bool=False, cut_off:int=100, figsize:tuple=(8,8)):
     self.interp = interp
     if str(type(interp.learn.data)) == "<class 'fastai.tabular.data.TabularDataBunch'>":
