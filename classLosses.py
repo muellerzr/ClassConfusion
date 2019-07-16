@@ -130,3 +130,60 @@ class ClassLosses():
         f[str(x)] = str(x)
         dfarr.append(f)
       self.create_graphs(dfarr, cat_names)
+      
+  def im_losses(self, classl:list, **kwargs):
+      if self.is_ordered == False:
+        comb = list(permutations(classl, 2))
+      else:
+        comb = classl
+      tl_val, tl_idx = self.interp.top_losses(len(self.interp.losses))
+
+      classes_gnd = self.interp.data.classes
+      vals = self.interp.most_confused()
+      ranges = []
+      tbnames = []
+
+      k = input('Please enter a value for `k`: ')
+      k = int(k)
+
+      for x in iter(vals):
+        for y in iter(comb):
+          if x[0:2] == y:
+            ranges.append(x[2])
+            tbnames.append(str(x[0] + ' | ' + x[1]))
+      print('Misclassified Pictures:')
+      tb = widgets.TabBar(tbnames)
+
+      for i, tab in enumerate(tbnames):
+        with tb.output_to(i):
+
+          x = 0          
+          if ranges[i] < k:
+            cols = math.ceil(math.sqrt(ranges[i]))
+            rows = math.ceil(ranges[i]/cols)
+
+          if ranges[i] < 4:
+            cols, rows = 2, 2
+
+          else:
+            cols = math.ceil(math.sqrt(k))
+            rows = math.ceil(k/cols)
+
+          fig, axes = plt.subplots(rows, cols, figsize=(8,8))
+          [axi.set_axis_off() for axi in axes.ravel()]
+          for j, idx in enumerate(tl_idx):
+            if k < x+1 or x > ranges[i]:
+              break
+            da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
+            row = (int)(x / cols)
+            col = x % cols
+
+            ix = int(cl)
+            if str(cl) == tab.split(' ')[0] and str(classes_gnd[self.interp.pred_class[idx]]) == tab.split(' ')[2]:
+              img, lbl = data.valid_ds[idx]
+              img.show(ax=axes[row,col])
+              fn = self.interp.data.valid_ds.x.items[idx]
+              fn = re.search('([^/*]+)_\d+.*$', str(fn)).group(0)
+              axes[row, col].set_title(fn)
+              x += 1
+          plt.tight_layout()
