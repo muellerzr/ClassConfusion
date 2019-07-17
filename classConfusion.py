@@ -7,7 +7,7 @@ from itertools import permutations
 from fastai.train import ClassificationInterpretation
 from google.colab import widgets
 
-class ClassLosses():
+class ClassConfusion():
     "Plot the most confused datapoints and statistics for the models misses." 
     def __init__(self, interp:ClassificationInterpretation, classlist:list, 
                is_ordered:bool=False, cut_off:int=100, varlist:list=None,
