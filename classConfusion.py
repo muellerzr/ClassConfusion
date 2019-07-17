@@ -25,13 +25,16 @@ class ClassLosses():
         self.figsize = figsize
         self.vars = varlist
         self.classl = classlist
-        self._show_losses(classlist)
+        self._show_losses(classlist)            
 
+    def _show_losses(self, classl:list, **kwargs):
+        "Checks if the model is for Tabular or Images and gathers top losses"
+        _, self.tl_idx = self.interp.top_losses(len(self.interp.losses))
+        self._tab_losses() if self._is_tab else self._create_tabs()
+        
     def _create_tabs(self):
         "Creates a tab for each variable"
-
         self.lis = self.classl if self.is_ordered else list(permutations(self.classl, 2))
-
         if self._is_tab:
             self._boxes = len(self.df_list)
             self._cols = math.ceil(math.sqrt(self._boxes))
@@ -50,44 +53,7 @@ class ClassLosses():
 
         self.tb = widgets.TabBar(self.tbnames)
         self._populate_tabs()
-
-    def _plot_tab(self, tab:str):
-        "Generates graphs"
-        if self._boxes is not None:
-            fig, ax = plt.subplots(self._boxes, figsize=self.figsize)
-        else:
-            fig, ax = plt.subplots(self._cols, self._rows, figsize=self.figsize)
-        fig.subplots_adjust(hspace=.5)
-        for j, x in enumerate(self.df_list):
-            ttl = f'{"".join(x.columns[-1])} {tab} distribution'
-            title = ttl if j == 0 else f'Misclassified {ttl}'
-
-            if self._boxes is None:
-                row = int(j / self._cols)
-                col = j % row
-            if tab in self.cat_names:
-                vals = pd.value_counts(x[tab].values)
-                if self._boxes is not None:
-                    if vals.nunique() < 10:
-                        fig = vals.plot(kind='bar', title=title,  ax=ax[j], rot=0, width=.75)
-                    else:
-                        fig = vals.plot(kind='barh', title=title,  ax=ax[j], width=.75)   
-                else:
-                    fig = vals.plot(kind='barh', title=title,  ax=ax[row, col], width=.75)
-            else:
-                vals = x[tab]
-                if self._boxes is not None:
-                    axs = vals.plot(kind='hist', ax=ax[j], title=title, y='Frequency')
-                else:
-                    axs = vals.plot(kind='hist', ax=ax[row, col], title=title, y='Frequency')
-                axs.set_ylabel('Frequency')
-                if len(set(vals)) > 1:
-                    vals.plot(kind='kde', ax=axs, title=title, secondary_y=True)
-                else:
-                    print('Less than two unique values, cannot graph the KDE')
-        plt.show(fig)
-        plt.tight_layout()
-
+        
     def _populate_tabs(self):
         "Adds relevant graphs to each tab"
         with tqdm(total=len(self.tbnames)) as pbar:
@@ -95,17 +61,10 @@ class ClassLosses():
                 with self.tb.output_to(i):
                     self._plot_tab(tab) if self._is_tab else self._plot_imgs(tab, i)
             pbar.update(1)
-        
-
-    def _show_losses(self, classl:list, **kwargs):
-        "Checks if the model is for Tabular or Images and gathers top losses"
-        _, self.tl_idx = self.interp.top_losses(len(self.interp.losses))
-        self._tab_losses() if self._is_tab else self._create_tabs()
 
     def _plot_imgs(self, tab:str, i:int ,**kwargs):
         "Plots the most confused images"
         classes_gnd = self.interp.data.classes
-
         x = 0
         if self._ranges[i] < k:
             cols = math.ceil(math.sqrt(self._ranges[i]))
@@ -138,6 +97,42 @@ class ClassLosses():
         plt.show(fig)
         plt.tight_layout()
 
+    def _plot_tab(self, tab:str):
+        "Generates graphs"
+        if self._boxes is not None:
+            fig, ax = plt.subplots(self._boxes, figsize=self.figsize)
+        else:
+            fig, ax = plt.subplots(self._cols, self._rows, figsize=self.figsize)
+        fig.subplots_adjust(hspace=.5)
+        for j, x in enumerate(self.df_list):
+            ttl = f'{"".join(x.columns[-1])} {tab} distribution'
+            title = ttl if j == 0 else f'Misclassified {ttl}'
+            if self._boxes is None:
+                row = int(j / self._cols)
+                col = j % row
+            if tab in self.cat_names:
+                vals = pd.value_counts(x[tab].values)
+                if self._boxes is not None:
+                    if vals.nunique() < 10:
+                        fig = vals.plot(kind='bar', title=title,  ax=ax[j], rot=0, width=.75)
+                    else:
+                        fig = vals.plot(kind='barh', title=title,  ax=ax[j], width=.75)   
+                else:
+                    fig = vals.plot(kind='barh', title=title,  ax=ax[row, col], width=.75)
+            else:
+                vals = x[tab]
+                if self._boxes is not None:
+                    axs = vals.plot(kind='hist', ax=ax[j], title=title, y='Frequency')
+                else:
+                    axs = vals.plot(kind='hist', ax=ax[row, col], title=title, y='Frequency')
+                axs.set_ylabel('Frequency')
+                if len(set(vals)) > 1:
+                    vals.plot(kind='kde', ax=axs, title=title, secondary_y=True)
+                else:
+                    print('Less than two unique values, cannot graph the KDE')
+        plt.show(fig)
+        plt.tight_layout()
+        
     def _tab_losses(self, **kwargs):
         "Gathers dataframes of the combinations data"
         classes = self.interp.data.classes
