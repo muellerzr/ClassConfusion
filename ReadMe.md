@@ -1,4 +1,4 @@
-# ClassLosses
+# ClassConfusion
 
 Class losses is a widget (currently only for Google Colab) that helps visualize what our model's weaknesses by providing visualizations and examining the losses between two or more class combinations. For image models, this is done by providing the overall image. For tabular models, the tool will provide variable-by-variable analysis of the trends found within the data.
 
