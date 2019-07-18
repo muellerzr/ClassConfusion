@@ -23,7 +23,6 @@ class ClassConfusion():
         self.is_ordered = is_ordered
         self.cut_off = cut_off
         self.figsize = figsize
-        self.vars = varlist
         self.classl = classlist
         self.varlist = varlist
         self._show_losses(classlist)            
@@ -67,11 +66,11 @@ class ClassConfusion():
         "Plots the most confused images"
         classes_gnd = self.interp.data.classes
         x = 0
-        if self._ranges[i] < k:
+        if self._ranges[i] < self._boxes:
             cols = math.ceil(math.sqrt(self._ranges[i]))
             rows = math.ceil(self._ranges[i]/cols)
 
-        if self._ranges[i] < 4 or k < 4:
+        if self._ranges[i] < 4 or self._boxes < 4:
             cols = 2
             rows = 2
         else:
@@ -81,7 +80,7 @@ class ClassConfusion():
 
         [axi.set_axis_off() for axi in ax.ravel()]
         for j, idx in enumerate(self.tl_idx):
-            if k < x+1 or x > self._ranges[i]:
+            if self._boxes < x+1 or x > self._ranges[i]:
                 break
             da, cl = self.interp.data.dl(self.interp.ds_type).dataset[idx]
             row = (int)(x / cols)
@@ -107,7 +106,6 @@ class ClassConfusion():
         fig.subplots_adjust(hspace=.5)
         for j, x in enumerate(self.df_list):
             ttl = f'{"".join(x.columns[-1])} {tab} distribution'
-            title = ttl if j == 0 else f'Misclassified {ttl}'
             if self._boxes is None:
                 row = int(j / self._cols)
                 col = j % row
@@ -116,6 +114,8 @@ class ClassConfusion():
                 if self._boxes is not None:
                     if vals.nunique() < 10:
                         fig = vals.plot(kind='bar', title=title,  ax=ax[j], rot=0, width=.75)
+                    elif vals.nunique() > self.cut_off:
+                        print(f'Number of values is above {self.cut_off}')
                     else:
                         fig = vals.plot(kind='barh', title=title,  ax=ax[j], width=.75)   
                 else:
@@ -141,8 +141,7 @@ class ClassConfusion():
         cont_names = self.interp.data.x.cont_names
         comb = self.classl if self.is_ordered else list(permutations(self.classl,2))
 
-        dfarr = []
-
+        self.df_list = []
         arr = []
         for i, idx in enumerate(self.tl_idx):
             da, _ = self.interp.data.dl(self.interp.ds_type).dataset[idx]
@@ -163,7 +162,7 @@ class ClassConfusion():
         for i, var in enumerate(self.interp.data.cont_names):
             f[var] = f[var].apply(lambda x: float(x) * self.stds[var] + self.means[var])
         f['Original'] = 'Original'
-        dfarr.append(f)
+        self.df_list.append(f)
 
         for j, x in enumerate(comb):
             arr = []
@@ -188,7 +187,6 @@ class ClassConfusion():
             for i, var in enumerate(self.interp.data.cont_names):
                 f[var] = f[var].apply(lambda x: float(x) * self.stds[var] + self.means[var])
             f[str(x)] = str(x)
-            dfarr.append(f)
-        self.df_list = dfarr
+            self.df_list.append(f)
         self.cat_names = cat_names
         self._create_tabs() 
