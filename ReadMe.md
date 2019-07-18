@@ -1,6 +1,6 @@
 # ClassConfusion
 
-Class losses is a widget (currently only for Google Colab) that helps visualize what our model's weaknesses by providing visualizations and examining the losses between two or more class combinations. For image models, this is done by providing the overall image. For tabular models, the tool will provide variable-by-variable analysis of the trends found within the data.
+Class Confusion was was designed to help extrapolate your models decisions through visuals such as graphs or confusion matrices that go more in-depth than the standard plot_confusion_matrix. Class Confusion can be used with both Tabular and Image classification models
 
 To utilize this function, input in the ClassificationInterpretation object as well as a list of classes you want to examine:
 ```python3
@@ -15,11 +15,9 @@ comboList = [('<50k', '>=50k')]
 ClassLosses(interp, comboList, is_ordered=True)
 ```
 
-An example of an image problem:
+Please read the Documentation for a guide to how to utilize this function.
 
-![](https://i.imgur.com/UzxFkzc.png)
+Some example outputs:
+![](https://camo.githubusercontent.com/dc2f4b6e86db5e41274b60e605de25dd3a29ee27/68747470733a2f2f692e696d6775722e636f6d2f6a41453642566d2e706e67)
 
-An example of a tabular problem:
-
-![](https://i.imgur.com/7S9vjsQ.png)
-![](https://i.imgur.com/oN1mXR7.png)
+![](https://camo.githubusercontent.com/cefb9ee9dd7ed469afff8b899040a8330ca043df/68747470733a2f2f692e696d6775722e636f6d2f695555537032412e706e67)
