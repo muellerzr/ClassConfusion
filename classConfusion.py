@@ -25,6 +25,7 @@ class ClassConfusion():
         self.figsize = figsize
         self.vars = varlist
         self.classl = classlist
+        self.varlist = varlist
         self._show_losses(classlist)            
 
     def _show_losses(self, classl:list, **kwargs):
@@ -39,7 +40,7 @@ class ClassConfusion():
             self._boxes = len(self.df_list)
             self._cols = math.ceil(math.sqrt(self._boxes))
             self._rows = math.ceil(self._boxes/self._cols)
-            self.tbnames = list(self.df_list[0].columns)[:-1]
+            self.tbnames = list(self.df_list[0].columns)[:-1] if self.varlist is None else self.varlist
         else:
             vals = self.interp.most_confused()
             self._ranges = []
